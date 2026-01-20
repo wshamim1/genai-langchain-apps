@@ -133,6 +133,52 @@ python genai-langchain/llms/example_chat.py
 python genai-langchain/llms/example_direct_without_langchain.py
 ```
 
+**Architecture**
+
+Below is a simple architecture diagram showing common ways an application can invoke LLMs. It includes both LangChain-based and direct-SDK flows, plus local model inference.
+
+Mermaid (renderers that support Mermaid will show a diagram):
+
+```mermaid
+flowchart LR
+    U[User / UI] -->|HTTP/gRPC/CLI| App[Application / Backend]
+    App -->|Uses LangChain| LC[LangChain Abstraction]
+    App -->|Direct SDK| SDK[Provider SDKs]
+    LC --> LLMService[LLM / Chat Model Wrappers]
+    LLMService --> OpenAI[OpenAI]
+    LLMService --> Anthropic[Anthropic]
+    LLMService --> Azure[Azure OpenAI]
+    LLMService --> HF[HuggingFaceHub]
+    SDK --> OpenAI
+    SDK --> Anthropic
+    SDK --> Azure
+    App -->|Local inference| Local[Local Transformers / On-Prem Model]
+
+    subgraph Features
+        LC --- Agents[Agents & Tools]
+        LC --- Streams[Streaming / Callbacks]
+        LC --- Chains[Chains & PromptTemplates]
+        SDK --- FeatureFlags[Provider-specific features]
+    end
+
+    style Local fill:#f9f,stroke:#333,stroke-width:1px
+```
+
+ASCII fallback (no Mermaid):
+
+```
+User/UI
+    |
+    v
+Application/Backend
+    |---> LangChain Abstraction -----> [LLM Wrappers] ---> OpenAI / Anthropic / Azure / HF
+    |---> Direct Provider SDK ----------------------------------> OpenAI / Anthropic / Azure
+    |---> Local Transformers (on-prem)
+
+LangChain Abstraction supports: Chains, Agents (tools), Streaming callbacks, and standardized async/sync APIs.
+Direct SDKs provide provider-specific features and may expose function-calling or newer APIs sooner.
+```
+
 **Need more?**
 
 - I can expand this into a longer README, add unit tests, or generate snippets for specific providers (Azure, Anthropic, Cohere). Tell me which you'd like next.
