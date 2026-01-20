@@ -1,0 +1,257 @@
+"""
+Examples demonstrating various tools in the LangChain framework.
+
+This script shows how to use individual tools for different tasks.
+"""
+
+import os
+import sys
+from dotenv import load_dotenv
+
+# Add src to path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
+
+from src.tools import (
+    CalculatorTool,
+    SearchTool,
+    FileReadTool,
+    FileWriteTool,
+    FileListTool,
+    APIRequestTool,
+    BaseTool,
+)
+
+# Load environment variables
+load_dotenv()
+
+
+def print_section(title: str):
+    """Print a formatted section header."""
+    print("\n" + "=" * 80)
+    print(f"  {title}")
+    print("=" * 80 + "\n")
+
+
+def example_calculator_tool():
+    """Example: Using the Calculator Tool"""
+    print_section("Example 1: Calculator Tool")
+    
+    calculator = CalculatorTool.create()
+    
+    print(f"Tool Name: {calculator.name}")
+    print(f"Description: {calculator.description}\n")
+    
+    # Test various calculations
+    expressions = [
+        "2 + 2",
+        "10 * 5 + 3",
+        "(100 - 20) / 4",
+        "2 ^ 8",  # Exponentiation
+        "15.5 * 2.5",
+    ]
+    
+    for expr in expressions:
+        result = calculator.run(expr)
+        print(f"Expression: {expr}")
+        print(f"{result}\n")
+
+
+def example_search_tool():
+    """Example: Using the Search Tool"""
+    print_section("Example 2: Search Tool (Mock)")
+    
+    search = SearchTool.create()
+    
+    print(f"Tool Name: {search.name}")
+    print(f"Description: {search.description}\n")
+    
+    # Test searches
+    queries = [
+        "What is Python?",
+        "Tell me about LangChain",
+        "What is the weather today?",
+    ]
+    
+    for query in queries:
+        result = search.run(query)
+        print(f"Query: {query}")
+        print(f"{result}\n")
+
+
+def example_file_operations():
+    """Example: Using File Operation Tools"""
+    print_section("Example 3: File Operations")
+    
+    # Create tools
+    file_write = FileWriteTool.create(base_directory=".")
+    file_read = FileReadTool.create(base_directory=".")
+    file_list = FileListTool.create(base_directory=".")
+    
+    # 1. Write a file
+    print("1. Writing a test file...")
+    content = """Hello from LangChain Tools!
+
+This is a test file created by the FileWriteTool.
+It demonstrates how tools can interact with the file system.
+
+Tools are powerful utilities that extend LLM capabilities!
+"""
+    
+    result = file_write.run("data/test_tool_output.txt|" + content)
+    print(f"{result}\n")
+    
+    # 2. Read the file
+    print("2. Reading the file back...")
+    result = file_read.run("data/test_tool_output.txt")
+    print(f"{result}\n")
+    
+    # 3. List files in data directory
+    print("3. Listing files in data/ directory...")
+    result = file_list.run("data")
+    print(f"{result}\n")
+
+
+def example_api_request_tool():
+    """Example: Using the API Request Tool"""
+    print_section("Example 4: API Request Tool")
+    
+    api_tool = APIRequestTool.create()
+    
+    print(f"Tool Name: {api_tool.name}")
+    print(f"Description: {api_tool.description}\n")
+    
+    # Test with a public API (JSONPlaceholder)
+    print("Making a GET request to JSONPlaceholder API...")
+    result = api_tool.run("GET|https://jsonplaceholder.typicode.com/posts/1")
+    print(f"{result}\n")
+
+
+def example_custom_function_tool():
+    """Example: Creating a Custom Tool from a Function"""
+    print_section("Example 5: Custom Function Tool")
+    
+    # Define a custom function
+    def word_counter(text: str) -> str:
+        """Count words in a text string."""
+        words = text.split()
+        return f"Word count: {len(words)}\nCharacter count: {len(text)}"
+    
+    # Create a tool from the function
+    word_count_tool = BaseTool.from_function(
+        func=word_counter,
+        name="word_counter",
+        description="Count words and characters in a text string"
+    )
+    
+    print(f"Tool Name: {word_count_tool.name}")
+    print(f"Description: {word_count_tool.description}\n")
+    
+    # Use the tool
+    sample_text = "LangChain is a framework for developing applications powered by language models."
+    result = word_count_tool.run(sample_text)
+    print(f"Text: {sample_text}")
+    print(f"{result}\n")
+
+
+def example_tool_chaining():
+    """Example: Chaining Multiple Tools Together"""
+    print_section("Example 6: Tool Chaining")
+    
+    print("Demonstrating how tools can work together:\n")
+    
+    # 1. Use calculator to compute something
+    calculator = CalculatorTool.create()
+    calc_result = calculator.run("100 * 1.15")  # Calculate 15% markup
+    print(f"Step 1 - Calculate price with markup:")
+    print(f"{calc_result}\n")
+    
+    # 2. Write result to a file
+    file_write = FileWriteTool.create(base_directory=".")
+    write_result = file_write.run(
+        "data/calculation_result.txt|" + 
+        f"Calculation Result:\n{calc_result}\n\nGenerated by tool chaining example."
+    )
+    print(f"Step 2 - Save result to file:")
+    print(f"{write_result}\n")
+    
+    # 3. Read it back
+    file_read = FileReadTool.create(base_directory=".")
+    read_result = file_read.run("data/calculation_result.txt")
+    print(f"Step 3 - Read result from file:")
+    print(f"{read_result}\n")
+
+
+def example_tool_error_handling():
+    """Example: Tool Error Handling"""
+    print_section("Example 7: Error Handling")
+    
+    calculator = CalculatorTool.create()
+    file_read = FileReadTool.create(base_directory=".")
+    
+    print("1. Invalid calculation:")
+    result = calculator.run("2 + + 2")  # Invalid syntax
+    print(f"{result}\n")
+    
+    print("2. Division by zero:")
+    result = calculator.run("10 / 0")
+    print(f"{result}\n")
+    
+    print("3. Reading non-existent file:")
+    result = file_read.run("nonexistent_file.txt")
+    print(f"{result}\n")
+    
+    print("4. Invalid characters in calculation:")
+    result = calculator.run("import os; os.system('ls')")  # Security check
+    print(f"{result}\n")
+
+
+def example_tool_metadata():
+    """Example: Accessing Tool Metadata"""
+    print_section("Example 8: Tool Metadata")
+    
+    tools = [
+        CalculatorTool.create(),
+        SearchTool.create(),
+        FileReadTool.create(),
+        APIRequestTool.create(),
+    ]
+    
+    print("Available Tools:\n")
+    for i, tool in enumerate(tools, 1):
+        metadata = tool.to_dict()
+        print(f"{i}. {metadata['name']}")
+        print(f"   Description: {metadata['description']}")
+        print(f"   Return Direct: {metadata['return_direct']}\n")
+
+
+def main():
+    """Run all tool examples."""
+    print("\n" + "=" * 80)
+    print("  LangChain Tools Examples")
+    print("=" * 80)
+    
+    try:
+        # Run examples
+        example_calculator_tool()
+        example_search_tool()
+        example_file_operations()
+        example_api_request_tool()
+        example_custom_function_tool()
+        example_tool_chaining()
+        example_tool_error_handling()
+        example_tool_metadata()
+        
+        print("\n" + "=" * 80)
+        print("  All examples completed successfully!")
+        print("=" * 80 + "\n")
+        
+    except Exception as e:
+        print(f"\n❌ Error running examples: {str(e)}")
+        import traceback
+        traceback.print_exc()
+
+
+if __name__ == "__main__":
+    main()
+
+# Made with Bob

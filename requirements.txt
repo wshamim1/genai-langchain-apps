@@ -1,0 +1,61 @@
+# Core dependencies for chat models framework
+
+# LangChain Core
+langchain
+langchain-core>=0.1.0
+langchain-community>=0.0.20
+
+# LangChain Provider Integrations
+langchain-openai>=0.0.5
+langchain-anthropic>=0.1.0
+langchain-google-genai>=0.0.6
+
+# Document Loaders
+# PDF loaders
+pypdf>=3.17.0
+pdfminer.six>=20221105
+pymupdf>=1.23.0
+
+# CSV and data processing
+pandas>=2.0.0
+
+# Text splitting
+langchain-text-splitters>=0.0.1
+
+# Vector Stores
+langchain-chroma>=0.1.0
+chromadb>=0.4.0
+
+# Embeddings
+# OpenAI embeddings (included in langchain-openai)
+
+# PDF creation (for examples)
+reportlab>=4.0.0
+
+# Environment variable management
+python-dotenv>=1.0.0
+
+# Tools dependencies
+# HTTP requests for API tools
+requests>=2.31.0
+
+# Optional: DuckDuckGo search
+# duckduckgo-search>=4.0.0
+
+# Optional: For async support
+aiohttp>=3.9.0
+
+# Optional: For better type hints
+typing-extensions>=4.9.0
+
+# Web Interface
+# Streamlit for web applications
+streamlit>=1.28.0
+
+# Development dependencies (optional)
+# Uncomment if needed for development
+# pytest>=7.4.0
+# pytest-asyncio>=0.21.0
+# black>=23.0.0
+# flake8>=6.0.0
+# mypy>=1.0.0
